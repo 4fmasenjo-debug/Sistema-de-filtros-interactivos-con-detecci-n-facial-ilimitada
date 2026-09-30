@@ -1,4 +1,4 @@
-const video = document.getElementById("video");
+<const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const SCALE_FACTOR_DISPERSION = 1;
@@ -57,8 +57,8 @@ function loadVideo(videoElement) {
 }
 
 Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
-    faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
+    faceapi.nets.tinyFaceDetector.loadFromUri("./models"),
+    faceapi.nets.faceLandmark68Net.loadFromUri("./models"),
     loadDomImages([...STICKERS_FANTASTICOS, ...STICKERS_MITOLOGICOS, convertedImg, fondoMaskImg, quetzalcoatlOverlayImg]),
     loadVideo(animacionWebmVideo)
 ]).then(startWebcam);
