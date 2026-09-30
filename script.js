@@ -4,7 +4,6 @@ const ctx = canvas.getContext("2d");
 
 const SCALE_FACTOR_DISPERSION = 1;
 
-
 // ============================================================
 // FANTÁSTICOS
 // ============================================================
@@ -22,7 +21,6 @@ const STICKERS_FANTASTICOS = [
 const TOTAL_STICKERS_PER_FACE = 25;
 const GLOBAL_SCALE_FACTOR = 0.20;
 
-
 // ============================================================
 // MITOLÓGICOS
 // ============================================================
@@ -30,7 +28,6 @@ const GLOBAL_SCALE_FACTOR = 0.20;
 const cerberoImg = document.getElementById("cerbero-img");
 const minotauroImg = document.getElementById("minotauro-img");
 const fenrirImg = document.getElementById("fenrir-img");
-const convertedImg = document.getElementById("converted-img");
 
 const STICKERS_MITOLOGICOS = [
     cerberoImg,
@@ -40,7 +37,6 @@ const STICKERS_MITOLOGICOS = [
 
 const TOTAL_FLOWERS_PER_FACE = 20;
 const FLOWER_SCALE_FACTOR = 0.18;
-
 
 // ============================================================
 // MÁSCARA Y OVERLAY
@@ -52,14 +48,12 @@ const fondoMaskImg = unicornioImg;
 const quetzalcoatlImg = document.getElementById("quetzalcoatl-img");
 const quetzalcoatlOverlayImg = quetzalcoatlImg;
 
-
 // ============================================================
 // DRAGÓN WEBM
 // ============================================================
 
 const animacionWebmVideo =
     document.getElementById("dragón-webm");
-
 
 // ============================================================
 // TIPOS DE FILTRO
@@ -76,71 +70,50 @@ const FILTER_TYPES = [
 let faceFilterCache = [];
 
 function getRandomFilterType() {
-
     return FILTER_TYPES[
         Math.floor(Math.random() * FILTER_TYPES.length)
     ];
-
 }
-
 
 // ============================================================
 // CARGA DE IMÁGENES
 // ============================================================
 
 function loadDomImages(images) {
-
     return Promise.all(
-
         images.map(img => {
-
             return new Promise((resolve, reject) => {
 
                 if (!img) {
-
                     reject(
                         new Error(
                             "No se encontró una imagen en el HTML"
                         )
                     );
-
                     return;
                 }
 
-
-                // La imagen ya está cargada
                 if (
                     img.complete &&
                     img.naturalWidth > 0
                 ) {
-
                     console.log(
                         "Imagen OK:",
                         img.src
                     );
-
                     resolve();
-
                     return;
                 }
 
-
-                // Imagen cargada correctamente
                 img.onload = () => {
-
                     console.log(
                         "Imagen OK:",
                         img.src
                     );
-
                     resolve();
-
                 };
 
-
-                // Error
                 img.onerror = () => {
-
                     console.error(
                         "ERROR CARGANDO IMAGEN:",
                         img.src
@@ -152,66 +125,46 @@ function loadDomImages(images) {
                             img.src
                         )
                     );
-
                 };
-
             });
-
         })
-
     );
-
 }
-
 
 // ============================================================
 // CARGA DEL WEBM
 // ============================================================
 
 function loadVideo(videoElement) {
-
     return new Promise((resolve, reject) => {
 
         if (!videoElement) {
-
             reject(
                 new Error(
                     "No se encontró el vídeo WEBM"
                 )
             );
-
             return;
         }
 
-
-        // Ya cargado
         if (videoElement.readyState >= 2) {
-
             console.log(
                 "WEBM OK:",
                 videoElement.src
             );
-
             resolve();
-
             return;
         }
-
 
         videoElement.oncanplaythrough = () => {
-
             console.log(
                 "WEBM OK:",
                 videoElement.src
             );
-
             resolve();
-
         };
 
-
         videoElement.onerror = () => {
-
             console.error(
                 "ERROR CARGANDO WEBM:",
                 videoElement.src
@@ -223,16 +176,11 @@ function loadVideo(videoElement) {
                     videoElement.src
                 )
             );
-
         };
 
-
         videoElement.load();
-
     });
-
 }
-
 
 // ============================================================
 // INICIO DE CARGA
@@ -246,7 +194,6 @@ console.log(
     "1. Cargando Tiny Face Detector..."
 );
 
-
 // ============================================================
 // CARGAR MODELOS + IMÁGENES + WEBM
 // ============================================================
@@ -254,53 +201,43 @@ console.log(
 Promise.all([
 
     // --------------------------------------------------------
-    // TINY FACE DETECTOR
+    // MODELO TINY FACE DETECTOR
     // --------------------------------------------------------
 
     faceapi.nets.tinyFaceDetector
         .loadFromUri("./models")
         .then(() => {
-
             console.log(
                 "2. Tiny Face Detector OK"
             );
-
         }),
 
-
     // --------------------------------------------------------
-    // FACE LANDMARK 68
+    // MODELO FACE LANDMARK 68
     // --------------------------------------------------------
 
     faceapi.nets.faceLandmark68Net
         .loadFromUri("./models")
         .then(() => {
-
             console.log(
                 "3. Face Landmark 68 OK"
             );
-
         }),
-
 
     // --------------------------------------------------------
     // IMÁGENES
     // --------------------------------------------------------
+    // IMPORTANTE:
+    // converted_image.png se ha eliminado porque
+    // no existe y estaba provocando el error 404.
+    // --------------------------------------------------------
 
     loadDomImages([
-
         ...STICKERS_FANTASTICOS,
-
         ...STICKERS_MITOLOGICOS,
-
-        convertedImg,
-
         fondoMaskImg,
-
         quetzalcoatlOverlayImg
-
     ]),
-
 
     // --------------------------------------------------------
     // WEBM
@@ -342,7 +279,6 @@ Promise.all([
 
 });
 
-
 // ============================================================
 // WEBCAM
 // ============================================================
@@ -361,14 +297,10 @@ function startWebcam() {
         return;
     }
 
-
     navigator.mediaDevices
         .getUserMedia({
-
             video: true,
-
             audio: false
-
         })
 
         .then(stream => {
@@ -389,9 +321,7 @@ function startWebcam() {
             );
 
         });
-
 }
-
 
 // ============================================================
 // LOOP PRINCIPAL
@@ -403,21 +333,15 @@ video.addEventListener("play", () => {
         "7. VIDEO INICIADO"
     );
 
-
     const displaySize = {
-
         width: video.width,
-
         height: video.height
-
     };
-
 
     faceapi.matchDimensions(
         canvas,
         displaySize
     );
-
 
     // --------------------------------------------------------
     // INICIAR WEBM
@@ -438,12 +362,10 @@ video.addEventListener("play", () => {
                 );
 
             });
-
     }
 
-
     // --------------------------------------------------------
-    // DETECCIÓN
+    // DETECCIÓN FACIAL
     // --------------------------------------------------------
 
     setInterval(async () => {
@@ -451,16 +373,15 @@ video.addEventListener("play", () => {
         try {
 
             const detections = await faceapi
-
                 .detectAllFaces(
                     video,
                     new faceapi.TinyFaceDetectorOptions()
                 )
-
                 .withFaceLandmarks();
 
-
-            // Limpiar canvas
+            // ------------------------------------------------
+            // LIMPIAR CANVAS
+            // ------------------------------------------------
 
             ctx.clearRect(
                 0,
@@ -469,8 +390,9 @@ video.addEventListener("play", () => {
                 canvas.height
             );
 
-
-            // Ajustar detecciones
+            // ------------------------------------------------
+            // REDIMENSIONAR DETECCIONES
+            // ------------------------------------------------
 
             const resizedDetections =
                 faceapi.resizeResults(
@@ -478,8 +400,9 @@ video.addEventListener("play", () => {
                     displaySize
                 );
 
-
-            // Ajustar caché
+            // ------------------------------------------------
+            // AJUSTAR CACHE
+            // ------------------------------------------------
 
             faceFilterCache =
                 faceFilterCache.slice(
@@ -487,15 +410,17 @@ video.addEventListener("play", () => {
                     resizedDetections.length
                 );
 
-
             // ------------------------------------------------
-            // DIBUJAR CADA CARA
+            // PROCESAR CADA CARA
             // ------------------------------------------------
 
             resizedDetections.forEach(
                 (detection, i) => {
 
-                    // Crear filtro nuevo
+                    // ----------------------------------------
+                    // ASIGNAR FILTRO ALEATORIO
+                    // ----------------------------------------
+
                     if (!faceFilterCache[i]) {
 
                         faceFilterCache[i] = {
@@ -511,20 +436,16 @@ video.addEventListener("play", () => {
                             "Nuevo filtro:",
                             faceFilterCache[i].type
                         );
-
                     }
-
 
                     const filterData =
                         faceFilterCache[i];
 
+                    // ----------------------------------------
+                    // APLICAR FILTRO
+                    // ----------------------------------------
 
                     switch (filterData.type) {
-
-
-                        // ------------------------------------
-                        // FANTÁSTICOS
-                        // ------------------------------------
 
                         case "FANTASTICOS_DINAMICO":
 
@@ -536,10 +457,6 @@ video.addEventListener("play", () => {
                             break;
 
 
-                        // ------------------------------------
-                        // MITOLÓGICOS
-                        // ------------------------------------
-
                         case "MITOLOGICOS":
 
                             drawFilterMitologicosEstaticas(
@@ -549,10 +466,6 @@ video.addEventListener("play", () => {
 
                             break;
 
-
-                        // ------------------------------------
-                        // MÁSCARA
-                        // ------------------------------------
 
                         case "MASCARA":
 
@@ -564,10 +477,6 @@ video.addEventListener("play", () => {
                             break;
 
 
-                        // ------------------------------------
-                        // PANTERA
-                        // ------------------------------------
-
                         case "PANTERA":
 
                             drawImageOverlay(
@@ -578,10 +487,6 @@ video.addEventListener("play", () => {
                             break;
 
 
-                        // ------------------------------------
-                        // DRAGÓN WEBM
-                        // ------------------------------------
-
                         case "WEBM_ANIMACION":
 
                             drawWebmOverlayFilter(
@@ -590,11 +495,9 @@ video.addEventListener("play", () => {
                             );
 
                             break;
-
                     }
 
                 }
-
             );
 
         }
@@ -612,7 +515,6 @@ video.addEventListener("play", () => {
 
 });
 
-
 // ============================================================
 // DRAGÓN WEBM
 // ============================================================
@@ -626,57 +528,40 @@ function drawWebmOverlayFilter(
         !detection ||
         !webmVideoElement
     ) {
-
         return;
     }
 
-
     const box =
         detection.detection.box;
-
 
     const cx =
         box.x +
         box.width / 2;
 
-
     const cy =
         box.y +
         box.height / 2;
 
-
     const th =
         box.height * 1.5;
-
 
     const videoWidth =
         webmVideoElement.videoWidth || 1;
 
-
     const scale =
         th / videoWidth;
-
 
     const tw =
         videoWidth * scale;
 
-
     ctx.drawImage(
-
         webmVideoElement,
-
         cx - tw / 2,
-
         cy - th / 2,
-
         tw,
-
         th
-
     );
-
 }
-
 
 // ============================================================
 // PEGATINAS FANTÁSTICOS
@@ -693,7 +578,6 @@ function drawRandomStickersFantásticos(
     const generateNew =
         cache.length === 0;
 
-
     for (
         let j = 0;
         j < count;
@@ -705,9 +589,8 @@ function drawRandomStickersFantásticos(
         let sizeFactor;
         let sticker;
 
-
         // ----------------------------------------------------
-        // CREAR POSICIONES
+        // CREAR PEGATINAS
         // ----------------------------------------------------
 
         if (generateNew) {
@@ -717,18 +600,15 @@ function drawRandomStickersFantásticos(
                 Math.random() *
                 box.width;
 
-
             absY =
                 box.y +
                 Math.random() *
                 box.height;
 
-
             sizeFactor =
                 0.8 +
                 Math.random() *
                 0.4;
-
 
             sticker =
                 stickerArray[
@@ -738,16 +618,13 @@ function drawRandomStickersFantásticos(
                     )
                 ];
 
-
             const vx =
                 (Math.random() - 0.5) *
                 10;
 
-
             const vy =
                 (Math.random() - 0.5) *
                 10;
-
 
             cache.push({
 
@@ -771,7 +648,6 @@ function drawRandomStickersFantásticos(
 
         }
 
-
         // ----------------------------------------------------
         // MOVER PEGATINAS
         // ----------------------------------------------------
@@ -781,29 +657,23 @@ function drawRandomStickersFantásticos(
             const c =
                 cache[j];
 
-
             c.relX +=
                 c.vx /
                 box.width;
-
 
             c.relY +=
                 c.vy /
                 box.height;
 
-
             c.vx +=
                 (Math.random() - 0.5) *
                 0.5;
-
 
             c.vy +=
                 (Math.random() - 0.5) *
                 0.5;
 
-
             const maxSpeed = 10;
-
 
             c.vx =
                 Math.max(
@@ -814,7 +684,6 @@ function drawRandomStickersFantásticos(
                     -maxSpeed
                 );
 
-
             c.vy =
                 Math.max(
                     Math.min(
@@ -824,8 +693,9 @@ function drawRandomStickersFantásticos(
                     -maxSpeed
                 );
 
-
-            // Rebote horizontal
+            // ----------------------------------------------
+            // LÍMITES HORIZONTALES
+            // ----------------------------------------------
 
             if (c.relX < 0) {
 
@@ -835,7 +705,6 @@ function drawRandomStickersFantásticos(
 
             }
 
-
             if (c.relX > 1) {
 
                 c.relX = 1;
@@ -844,8 +713,9 @@ function drawRandomStickersFantásticos(
 
             }
 
-
-            // Rebote vertical
+            // ----------------------------------------------
+            // LÍMITES VERTICALES
+            // ----------------------------------------------
 
             if (c.relY < 0) {
 
@@ -855,7 +725,6 @@ function drawRandomStickersFantásticos(
 
             }
 
-
             if (c.relY > 1) {
 
                 c.relY = 1;
@@ -864,37 +733,38 @@ function drawRandomStickersFantásticos(
 
             }
 
+            // ----------------------------------------------
+            // NUEVA POSICIÓN
+            // ----------------------------------------------
 
             absX =
                 box.x +
                 c.relX *
                 box.width;
 
-
             absY =
                 box.y +
                 c.relY *
                 box.height;
 
-
             sizeFactor =
                 c.sizeFactor;
 
-
             sticker =
                 c.img;
-
         }
 
-
         // ----------------------------------------------------
-        // DIBUJAR
+        // TAMAÑO
         // ----------------------------------------------------
 
         const size =
             baseStickerSize *
             sizeFactor;
 
+        // ----------------------------------------------------
+        // DIBUJAR
+        // ----------------------------------------------------
 
         if (
             sticker &&
@@ -903,25 +773,16 @@ function drawRandomStickersFantásticos(
         ) {
 
             ctx.drawImage(
-
                 sticker,
-
                 absX - size / 2,
-
                 absY - size / 2,
-
                 size,
-
                 size
-
             );
 
         }
-
     }
-
 }
-
 
 // ============================================================
 // FANTÁSTICOS DINÁMICOS
@@ -935,16 +796,13 @@ function drawFilterFantasticosDinamicas(
     const box =
         detection.detection.box;
 
-
     const newW =
         box.width *
         SCALE_FACTOR_DISPERSION;
 
-
     const newH =
         box.height *
         SCALE_FACTOR_DISPERSION;
-
 
     const extendedBox = {
 
@@ -959,14 +817,11 @@ function drawFilterFantasticosDinamicas(
         width: newW,
 
         height: newH
-
     };
-
 
     const baseSize =
         extendedBox.width *
         GLOBAL_SCALE_FACTOR;
-
 
     drawRandomStickersFantásticos(
 
@@ -979,11 +834,8 @@ function drawFilterFantasticosDinamicas(
         STICKERS_FANTASTICOS,
 
         cache
-
     );
-
 }
-
 
 // ============================================================
 // PEGATINAS MITOLÓGICAS ESTÁTICAS
@@ -1000,7 +852,6 @@ function drawRandomStickersInBox(
     const generateNew =
         cache.length === 0;
 
-
     for (
         let j = 0;
         j < count;
@@ -1012,9 +863,8 @@ function drawRandomStickersInBox(
         let sizeFactor;
         let sticker;
 
-
         // ----------------------------------------------------
-        // CREAR
+        // CREAR PEGATINAS
         // ----------------------------------------------------
 
         if (generateNew) {
@@ -1024,18 +874,15 @@ function drawRandomStickersInBox(
                 Math.random() *
                 box.width;
 
-
             absY =
                 box.y +
                 Math.random() *
                 box.height;
 
-
             sizeFactor =
                 0.8 +
                 Math.random() *
                 0.4;
-
 
             sticker =
                 stickerArray[
@@ -1044,7 +891,6 @@ function drawRandomStickersInBox(
                         stickerArray.length
                     )
                 ];
-
 
             cache.push({
 
@@ -1064,9 +910,8 @@ function drawRandomStickersInBox(
 
         }
 
-
         // ----------------------------------------------------
-        // RECUPERAR
+        // MANTENER POSICIÓN
         // ----------------------------------------------------
 
         else {
@@ -1074,37 +919,34 @@ function drawRandomStickersInBox(
             const c =
                 cache[j];
 
-
             absX =
                 box.x +
                 c.relX *
                 box.width;
-
 
             absY =
                 box.y +
                 c.relY *
                 box.height;
 
-
             sizeFactor =
                 c.sizeFactor;
 
-
             sticker =
                 c.img;
-
         }
 
-
         // ----------------------------------------------------
-        // DIBUJAR
+        // TAMAÑO
         // ----------------------------------------------------
 
         const size =
             baseStickerSize *
             sizeFactor;
 
+        // ----------------------------------------------------
+        // DIBUJAR
+        // ----------------------------------------------------
 
         if (
             sticker &&
@@ -1113,25 +955,16 @@ function drawRandomStickersInBox(
         ) {
 
             ctx.drawImage(
-
                 sticker,
-
                 absX - size / 2,
-
                 absY - size / 2,
-
                 size,
-
                 size
-
             );
 
         }
-
     }
-
 }
-
 
 // ============================================================
 // MITOLÓGICOS
@@ -1145,16 +978,13 @@ function drawFilterMitologicosEstaticas(
     const box =
         detection.detection.box;
 
-
     const newW =
         box.width *
         SCALE_FACTOR_DISPERSION;
 
-
     const newH =
         box.height *
         SCALE_FACTOR_DISPERSION;
-
 
     const extendedBox = {
 
@@ -1169,14 +999,11 @@ function drawFilterMitologicosEstaticas(
         width: newW,
 
         height: newH
-
     };
-
 
     const baseSize =
         extendedBox.width *
         FLOWER_SCALE_FACTOR;
-
 
     drawRandomStickersInBox(
 
@@ -1189,11 +1016,8 @@ function drawFilterMitologicosEstaticas(
         STICKERS_MITOLOGICOS,
 
         cache
-
     );
-
 }
-
 
 // ============================================================
 // MÁSCARA
@@ -1209,60 +1033,46 @@ function drawMaskFilter(
         !maskImage.complete ||
         maskImage.naturalWidth === 0
     ) {
-
         return;
     }
-
 
     const box =
         detection.detection.box;
 
-
     const landmarks =
         detection.landmarks;
 
-
     if (!landmarks) {
-
         return;
-
     }
-
 
     const jaw =
         landmarks.getJawOutline();
 
-
     const left =
         landmarks.getLeftEyeBrow();
 
-
     const right =
         landmarks.getRightEyeBrow();
-
 
     const foreheadTopY =
         box.y -
         box.height *
         0.10;
 
-
     const maskLeftX =
         box.x -
         box.width *
         0.05;
-
 
     const maskRightX =
         box.x +
         box.width *
         1.05;
 
-
     const maskWidth =
         maskRightX -
         maskLeftX;
-
 
     const maskHeight =
         (jaw[8]?.y ||
@@ -1270,19 +1080,15 @@ function drawMaskFilter(
         -
         foreheadTopY;
 
-
     const cx =
         maskLeftX +
         maskWidth / 2;
-
 
     const cy =
         foreheadTopY +
         maskHeight / 2;
 
-
     ctx.save();
-
 
     // --------------------------------------------------------
     // RECORTE DE LA CARA
@@ -1290,30 +1096,25 @@ function drawMaskFilter(
 
     ctx.beginPath();
 
-
     ctx.moveTo(
         maskLeftX,
         foreheadTopY
     );
-
 
     ctx.lineTo(
         maskRightX,
         foreheadTopY
     );
 
-
     ctx.lineTo(
         right[4].x,
         right[4].y
     );
 
-
     ctx.lineTo(
         jaw[jaw.length - 1].x,
         jaw[jaw.length - 1].y
     );
-
 
     for (
         let i = jaw.length - 2;
@@ -1328,21 +1129,17 @@ function drawMaskFilter(
 
     }
 
-
     ctx.lineTo(
         left[0].x,
         left[0].y
     );
 
-
     ctx.closePath();
-
 
     ctx.clip();
 
-
     // --------------------------------------------------------
-    // DIBUJAR MÁSCARA
+    // ESCALA DE LA MÁSCARA
     // --------------------------------------------------------
 
     const scale =
@@ -1355,7 +1152,6 @@ function drawMaskFilter(
                 maskImage.naturalHeight
 
         ) * 0.73;
-
 
     drawImageWithTransform(
 
@@ -1381,14 +1177,10 @@ function drawMaskFilter(
                 maskImage.naturalHeight / 2
 
         }
-
     );
 
-
     ctx.restore();
-
 }
-
 
 // ============================================================
 // OVERLAY
@@ -1404,39 +1196,31 @@ function drawImageOverlay(
         !overlayImage.complete ||
         overlayImage.naturalWidth === 0
     ) {
-
         return;
     }
 
-
     const box =
         detection.detection.box;
-
 
     const cx =
         box.x +
         box.width / 2;
 
-
     const cy =
         box.y +
         box.height / 2;
-
 
     const tw =
         box.width *
         0.9;
 
-
     const scale =
         tw /
         overlayImage.naturalWidth;
 
-
     const th =
         overlayImage.naturalHeight *
         scale;
-
 
     ctx.drawImage(
 
@@ -1451,12 +1235,10 @@ function drawImageOverlay(
         th
 
     );
-
 }
 
-
 // ============================================================
-// TRANSFORMACIÓN DE IMÁGENES
+// TRANSFORMACIÓN
 // ============================================================
 
 function drawImageWithTransform(
@@ -1467,17 +1249,14 @@ function drawImageWithTransform(
 
     ctx.save();
 
-
     ctx.translate(
         t.translate[0],
         t.translate[1]
     );
 
-
     ctx.rotate(
         (t.rotate * Math.PI) / 180
     );
-
 
     ctx.scale(
         t.scale,
@@ -1485,12 +1264,10 @@ function drawImageWithTransform(
     );
 
     ctx.drawImage(
-
         img,
-
         -t.offsetX,
-
         -t.offsetY
     );
+
     ctx.restore();
 }
