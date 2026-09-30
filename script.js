@@ -1484,7 +1484,6 @@ function drawImageWithTransform(
         t.scale
     );
 
-
     ctx.drawImage(
 
         img,
@@ -1492,11 +1491,6 @@ function drawImageWithTransform(
         -t.offsetX,
 
         -t.offsetY
-
     );
-
-
     ctx.restore();
-
 }
-
