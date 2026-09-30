@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Filtro de Mitología</title>
+    <script defer src="face-api.js"></script>
+    <script defer src="script.js"></script>
+    <style>
+        body { 
+            margin: 0; padding: 0; overflow: hidden;
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; background-color: #f0f0f0; 
+        }
+        .container { position: relative; }
+        video, canvas {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); 
+        }
+        #video { 
+            transform: translate(-50%, -50%) scaleX(-1);
+        }
+        .container ~ * {
+             display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video id="video" width="720" height="560" autoplay muted></video>
+        <canvas id="canvas" width="720" height="560"></canvas>
+    </div>
+
+    <img id="fenix-img" src="Nueva carpeta/fénix.png" /> 
+    <img id="hipogrifo-img" src="Nueva carpeta/hipogrifo.png" />
+    <img id="pegaso-img" src="Nueva carpeta/pegaso.png" />
+
+    <img id="cerbero-img" src="Nueva carpeta/cerbero.png" />
+    <img id="minotauro-img" src="Nueva carpeta/minotauro.png" />
+    <img id="fenrir-img" src="Nueva carpeta/fenrir.png" />
+    <img id="converted-img" src="Nueva carpeta/converted_image.png" /> 
+
+    <img id="unicornio-img" src="Nueva carpeta/unicornio.png" />
+
+    <img id="quetzalcoatl-img" src="Nueva carpeta/quetzalcoatl.png" /> 
+
+    <video id="dragón-webm" src="Nueva carpeta/dragón.webm" loop muted preload="auto"></video>
+    
+</body>
+</html>
