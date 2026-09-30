@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Filtro de Mitología</title>
-
     <script defer src="./face-api.js"></script>
 <script src="./script.js?v=2002" defer></script>
     <style>
@@ -17,19 +15,16 @@
             overflow: hidden;
             background: #f0f0f0;
         }
-
         body {
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .container {
             position: relative;
             width: 720px;
             height: 560px;
         }
-
         #video,
         #canvas {
             position: absolute;
@@ -38,25 +33,20 @@
             width: 720px;
             height: 560px;
         }
-
         #video {
             transform: scaleX(-1);
             object-fit: cover;
         }
-
         #canvas {
             pointer-events: none;
         }
-
         /* Las imágenes solo sirven como fuentes para canvas */
         .assets {
             display: none;
         }
     </style>
 </head>
-
 <body>
-
     <div class="container">
         <video
             id="video"
@@ -66,16 +56,13 @@
             muted
             playsinline>
         </video>
-
         <canvas
             id="canvas"
             width="720"
             height="560">
         </canvas>
     </div>
-
     <div class="assets">
-
         <img id="fenix-img" src="./Nueva carpeta/fénix.png" alt="">
         <img id="hipogrifo-img" src="./Nueva carpeta/hipogrifo.png" alt="">
         <img id="pegaso-img" src="./Nueva carpeta/pegaso.png" alt="">
@@ -96,8 +83,6 @@
             playsinline
             preload="auto">
         </video>
-
     </div>
-
 </body>
 </html>
