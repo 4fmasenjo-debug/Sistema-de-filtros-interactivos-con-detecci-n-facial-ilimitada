@@ -1,49 +1,104 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Filtro de Mitología</title>
-    <script defer src="face-api.js"></script>
-    <script defer src="script.js"></script>
+
+    <script defer src="./face-api.js"></script>
+    <script defer src="./script.js"></script>
+
     <style>
-        body { 
-            margin: 0; padding: 0; overflow: hidden;
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; background-color: #f0f0f0; 
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #f0f0f0;
         }
-        .container { position: relative; }
-        video, canvas {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); 
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        #video { 
-            transform: translate(-50%, -50%) scaleX(-1);
+
+        .container {
+            position: relative;
+            width: 720px;
+            height: 560px;
         }
-        .container ~ * {
-             display: none;
+
+        #video,
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 720px;
+            height: 560px;
+        }
+
+        #video {
+            transform: scaleX(-1);
+            object-fit: cover;
+        }
+
+        #canvas {
+            pointer-events: none;
+        }
+
+        /* Las imágenes solo sirven como fuentes para canvas */
+        .assets {
+            display: none;
         }
     </style>
 </head>
+
 <body>
+
     <div class="container">
-        <video id="video" width="720" height="560" autoplay muted></video>
-        <canvas id="canvas" width="720" height="560"></canvas>
+        <video
+            id="video"
+            width="720"
+            height="560"
+            autoplay
+            muted
+            playsinline>
+        </video>
+
+        <canvas
+            id="canvas"
+            width="720"
+            height="560">
+        </canvas>
     </div>
 
-    <img id="fenix-img" src="Nueva carpeta/fénix.png" /> 
-    <img id="hipogrifo-img" src="Nueva carpeta/hipogrifo.png" />
-    <img id="pegaso-img" src="Nueva carpeta/pegaso.png" />
+    <div class="assets">
 
-    <img id="cerbero-img" src="Nueva carpeta/cerbero.png" />
-    <img id="minotauro-img" src="Nueva carpeta/minotauro.png" />
-    <img id="fenrir-img" src="Nueva carpeta/fenrir.png" />
-    <img id="converted-img" src="Nueva carpeta/converted_image.png" /> 
+        <img id="fenix-img" src="./Nueva carpeta/fénix.png" alt="">
+        <img id="hipogrifo-img" src="./Nueva carpeta/hipogrifo.png" alt="">
+        <img id="pegaso-img" src="./Nueva carpeta/pegaso.png" alt="">
 
-    <img id="unicornio-img" src="Nueva carpeta/unicornio.png" />
+        <img id="cerbero-img" src="./Nueva carpeta/cerbero.png" alt="">
+        <img id="minotauro-img" src="./Nueva carpeta/minotauro.png" alt="">
+        <img id="fenrir-img" src="./Nueva carpeta/fenrir.png" alt="">
+        <img id="converted-img" src="./Nueva carpeta/converted_image.png" alt="">
 
-    <img id="quetzalcoatl-img" src="Nueva carpeta/quetzalcoatl.png" /> 
+        <img id="unicornio-img" src="./Nueva carpeta/unicornio.png" alt="">
+        <img id="quetzalcoatl-img" src="./Nueva carpeta/quetzalcoatl.png" alt="">
 
-    <video id="dragón-webm" src="Nueva carpeta/dragón.webm" loop muted preload="auto"></video>
-    
+        <video
+            id="dragón-webm"
+            src="./Nueva carpeta/dragón.webm"
+            loop
+            muted
+            playsinline
+            preload="auto">
+        </video>
+
+    </div>
+
 </body>
 </html>
