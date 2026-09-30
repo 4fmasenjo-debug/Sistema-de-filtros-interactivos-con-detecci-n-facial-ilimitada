@@ -1,277 +1,1502 @@
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+
 const SCALE_FACTOR_DISPERSION = 1;
 
-// --- FANTÁSTICOS (DINÁMICO) ---
+
+// ============================================================
+// FANTÁSTICOS
+// ============================================================
+
 const fenixImg = document.getElementById("fenix-img");
 const hipogrifoImg = document.getElementById("hipogrifo-img");
 const pegasoImg = document.getElementById("pegaso-img");
-const STICKERS_FANTASTICOS = [fenixImg, hipogrifoImg, pegasoImg];
+
+const STICKERS_FANTASTICOS = [
+    fenixImg,
+    hipogrifoImg,
+    pegasoImg
+];
+
 const TOTAL_STICKERS_PER_FACE = 25;
 const GLOBAL_SCALE_FACTOR = 0.20;
 
-// --- MITOLÓGICOS (ESTÁTICO) ---
+
+// ============================================================
+// MITOLÓGICOS
+// ============================================================
+
 const cerberoImg = document.getElementById("cerbero-img");
 const minotauroImg = document.getElementById("minotauro-img");
 const fenrirImg = document.getElementById("fenrir-img");
 const convertedImg = document.getElementById("converted-img");
-const STICKERS_MITOLOGICOS = [cerberoImg, minotauroImg, fenrirImg];
+
+const STICKERS_MITOLOGICOS = [
+    cerberoImg,
+    minotauroImg,
+    fenrirImg
+];
+
 const TOTAL_FLOWERS_PER_FACE = 20;
 const FLOWER_SCALE_FACTOR = 0.18;
 
-// ---  (MÁSCARA) y PANTERA (OVERLAY) ---
+
+// ============================================================
+// MÁSCARA Y OVERLAY
+// ============================================================
+
 const unicornioImg = document.getElementById("unicornio-img");
 const fondoMaskImg = unicornioImg;
+
 const quetzalcoatlImg = document.getElementById("quetzalcoatl-img");
 const quetzalcoatlOverlayImg = quetzalcoatlImg;
 
-// --- DRAGÓN (WEBM) ---
-const animacionWebmVideo = document.getElementById("dragón-webm");
 
-// --- TIPOS DE FILTROS ---
-const FILTER_TYPES = ['FANTASTICOS_DINAMICO', 'MITOLOGICOS', 'MASCARA', 'PANTERA', 'WEBM_ANIMACION'];
+// ============================================================
+// DRAGÓN WEBM
+// ============================================================
+
+const animacionWebmVideo =
+    document.getElementById("dragón-webm");
+
+
+// ============================================================
+// TIPOS DE FILTRO
+// ============================================================
+
+const FILTER_TYPES = [
+    "FANTASTICOS_DINAMICO",
+    "MITOLOGICOS",
+    "MASCARA",
+    "PANTERA",
+    "WEBM_ANIMACION"
+];
+
 let faceFilterCache = [];
+
 function getRandomFilterType() {
-    return FILTER_TYPES[Math.floor(Math.random() * FILTER_TYPES.length)];
+
+    return FILTER_TYPES[
+        Math.floor(Math.random() * FILTER_TYPES.length)
+    ];
+
 }
 
-// --- CARGA DE ARCHIVOS ---
+
+// ============================================================
+// CARGA DE IMÁGENES
+// ============================================================
+
 function loadDomImages(images) {
-    return Promise.all(images.map(img => new Promise(resolve => {
-        if (!img) return resolve();
-        if (img.complete) return resolve();
-        img.onload = resolve;
-        img.onerror = resolve;
-    })));
+
+    return Promise.all(
+
+        images.map(img => {
+
+            return new Promise((resolve, reject) => {
+
+                if (!img) {
+
+                    reject(
+                        new Error(
+                            "No se encontró una imagen en el HTML"
+                        )
+                    );
+
+                    return;
+                }
+
+
+                // La imagen ya está cargada
+                if (
+                    img.complete &&
+                    img.naturalWidth > 0
+                ) {
+
+                    console.log(
+                        "Imagen OK:",
+                        img.src
+                    );
+
+                    resolve();
+
+                    return;
+                }
+
+
+                // Imagen cargada correctamente
+                img.onload = () => {
+
+                    console.log(
+                        "Imagen OK:",
+                        img.src
+                    );
+
+                    resolve();
+
+                };
+
+
+                // Error
+                img.onerror = () => {
+
+                    console.error(
+                        "ERROR CARGANDO IMAGEN:",
+                        img.src
+                    );
+
+                    reject(
+                        new Error(
+                            "No se pudo cargar la imagen: " +
+                            img.src
+                        )
+                    );
+
+                };
+
+            });
+
+        })
+
+    );
+
 }
+
+
+// ============================================================
+// CARGA DEL WEBM
+// ============================================================
 
 function loadVideo(videoElement) {
-    return new Promise(resolve => {
-        if (!videoElement) return resolve();
-        if (videoElement.readyState >= 2) return resolve();
-        videoElement.oncanplaythrough = resolve;
-        videoElement.onerror = resolve;
+
+    return new Promise((resolve, reject) => {
+
+        if (!videoElement) {
+
+            reject(
+                new Error(
+                    "No se encontró el vídeo WEBM"
+                )
+            );
+
+            return;
+        }
+
+
+        // Ya cargado
+        if (videoElement.readyState >= 2) {
+
+            console.log(
+                "WEBM OK:",
+                videoElement.src
+            );
+
+            resolve();
+
+            return;
+        }
+
+
+        videoElement.oncanplaythrough = () => {
+
+            console.log(
+                "WEBM OK:",
+                videoElement.src
+            );
+
+            resolve();
+
+        };
+
+
+        videoElement.onerror = () => {
+
+            console.error(
+                "ERROR CARGANDO WEBM:",
+                videoElement.src
+            );
+
+            reject(
+                new Error(
+                    "No se pudo cargar el WEBM: " +
+                    videoElement.src
+                )
+            );
+
+        };
+
+
         videoElement.load();
+
     });
+
 }
+
+
+// ============================================================
+// INICIO DE CARGA
+// ============================================================
+
+console.log("=================================");
+console.log("INICIANDO CARGA");
+console.log("=================================");
+
+console.log(
+    "1. Cargando Tiny Face Detector..."
+);
+
+
+// ============================================================
+// CARGAR MODELOS + IMÁGENES + WEBM
+// ============================================================
 
 Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri("./models"),
-    faceapi.nets.faceLandmark68Net.loadFromUri("./models"),
-    loadDomImages([...STICKERS_FANTASTICOS, ...STICKERS_MITOLOGICOS, convertedImg, fondoMaskImg, quetzalcoatlOverlayImg]),
+
+    // --------------------------------------------------------
+    // TINY FACE DETECTOR
+    // --------------------------------------------------------
+
+    faceapi.nets.tinyFaceDetector
+        .loadFromUri("./models")
+        .then(() => {
+
+            console.log(
+                "2. Tiny Face Detector OK"
+            );
+
+        }),
+
+
+    // --------------------------------------------------------
+    // FACE LANDMARK 68
+    // --------------------------------------------------------
+
+    faceapi.nets.faceLandmark68Net
+        .loadFromUri("./models")
+        .then(() => {
+
+            console.log(
+                "3. Face Landmark 68 OK"
+            );
+
+        }),
+
+
+    // --------------------------------------------------------
+    // IMÁGENES
+    // --------------------------------------------------------
+
+    loadDomImages([
+
+        ...STICKERS_FANTASTICOS,
+
+        ...STICKERS_MITOLOGICOS,
+
+        convertedImg,
+
+        fondoMaskImg,
+
+        quetzalcoatlOverlayImg
+
+    ]),
+
+
+    // --------------------------------------------------------
+    // WEBM
+    // --------------------------------------------------------
+
     loadVideo(animacionWebmVideo)
-]).then(startWebcam);
 
-function startWebcam() {
-    navigator.mediaDevices.getUserMedia({ video: {} }).then(stream => {
-        video.srcObject = stream;
-    });
-}
+])
 
-// --- LOOP PRINCIPAL ---
-video.addEventListener("play", () => {
-    const displaySize = { width: video.width, height: video.height };
-    faceapi.matchDimensions(canvas, displaySize);
+.then(() => {
 
-    if (animacionWebmVideo && animacionWebmVideo.paused) animacionWebmVideo.play();
-    setInterval(async () => {
-        const detections = await faceapi
-            .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        faceFilterCache = faceFilterCache.slice(0, resizedDetections.length);
-        resizedDetections.forEach((detection, i) => {
-            if (!faceFilterCache[i]) {
-                faceFilterCache[i] = {
-                    type: getRandomFilterType(),
-                    specificCache: []
-                };
-            }
-            const filterData = faceFilterCache[i];
-            switch (filterData.type) {
-                case 'FANTASTICOS_DINAMICO':
-                    drawFilterFantasticosDinamicas(detection, filterData.specificCache);
-                    break;
-                case 'MITOLOGICOS':
-                    drawFilterMitologicosEstaticas(detection, filterData.specificCache);
-                    break;
-                case 'MASCARA':
-                    drawMaskFilter(detection, quetzalcoatlOverlayImg);
-                    break;
-                case 'PANTERA':
-                    drawImageOverlay(detection, fondoMaskImg);
-                    break;
-                case 'WEBM_ANIMACION':
-                    drawWebmOverlayFilter(detection, animacionWebmVideo);
-                    break;
-            }
-        });
+    console.log(
+        "4. TODOS LOS ARCHIVOS CARGADOS"
+    );
 
-    }, 100);
+    console.log(
+        "5. Iniciando webcam..."
+    );
+
+    startWebcam();
+
+})
+
+.catch(error => {
+
+    console.error(
+        "================================="
+    );
+
+    console.error(
+        "ERROR DURANTE LA CARGA"
+    );
+
+    console.error(error);
+
+    console.error(
+        "================================="
+    );
+
 });
 
-// --- WEBM DRAGÓN ---
-function drawWebmOverlayFilter(detection, webmVideoElement) {
-    if (!detection || !webmVideoElement) return;
-    const box = detection.detection.box;
-    const cx = box.x + box.width / 2;
-    const cy = box.y + box.height / 2;
-    const th = box.height * 1.5;
-    const scale = th / (webmVideoElement.videoWidth || 1);
-    const tw = (webmVideoElement.videoWidth || 1) * scale;
-    ctx.drawImage(webmVideoElement, cx - tw / 2, cy - th / 2, tw, th);
+
+// ============================================================
+// WEBCAM
+// ============================================================
+
+function startWebcam() {
+
+    if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+    ) {
+
+        console.error(
+            "getUserMedia no está disponible"
+        );
+
+        return;
+    }
+
+
+    navigator.mediaDevices
+        .getUserMedia({
+
+            video: true,
+
+            audio: false
+
+        })
+
+        .then(stream => {
+
+            console.log(
+                "6. Cámara OK"
+            );
+
+            video.srcObject = stream;
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "ERROR DE CÁMARA:",
+                error
+            );
+
+        });
+
 }
 
-// --- PEGATINAS FANTÁSTICOS TOTALMENTE ALEATORIAS Y RÁPIDAS ---
-function drawRandomStickersFantásticos(box, count, baseStickerSize, stickerArray, cache) {
-    const generateNew = cache.length === 0;
-    for (let j = 0; j < count; j++) {
-        let absX, absY, sizeFactor, sticker;
-        if (generateNew) {
-            absX = box.x + Math.random() * box.width;
-            absY = box.y + Math.random() * box.height;
-            sizeFactor = 0.8 + Math.random() * 0.4;
-            sticker = stickerArray[Math.floor(Math.random() * stickerArray.length)];
-            const vx = (Math.random() - 0.5) * 10;
-            const vy = (Math.random() - 0.5) * 10;
-            cache.push({ 
-                relX: (absX - box.x) / box.width, 
-                relY: (absY - box.y) / box.height, 
-                sizeFactor, 
-                img: sticker, 
-                vx, 
-                vy 
+
+// ============================================================
+// LOOP PRINCIPAL
+// ============================================================
+
+video.addEventListener("play", () => {
+
+    console.log(
+        "7. VIDEO INICIADO"
+    );
+
+
+    const displaySize = {
+
+        width: video.width,
+
+        height: video.height
+
+    };
+
+
+    faceapi.matchDimensions(
+        canvas,
+        displaySize
+    );
+
+
+    // --------------------------------------------------------
+    // INICIAR WEBM
+    // --------------------------------------------------------
+
+    if (
+        animacionWebmVideo &&
+        animacionWebmVideo.paused
+    ) {
+
+        animacionWebmVideo
+            .play()
+            .catch(error => {
+
+                console.warn(
+                    "No se pudo reproducir el WEBM:",
+                    error
+                );
+
             });
-        } else {
-            const c = cache[j];
-            c.relX += c.vx / box.width;
-            c.relY += c.vy / box.height;
-            c.vx += (Math.random() - 0.5) * 0.5;
-            c.vy += (Math.random() - 0.5) * 0.5;
-            const maxSpeed = 10;
-            c.vx = Math.max(Math.min(c.vx, maxSpeed), -maxSpeed);
-            c.vy = Math.max(Math.min(c.vy, maxSpeed), -maxSpeed);
-            if (c.relX < 0) { c.relX = 0; c.vx *= -1; }
-            if (c.relX > 1) { c.relX = 1; c.vx *= -1; }
-            if (c.relY < 0) { c.relY = 0; c.vy *= -1; }
-            if (c.relY > 1) { c.relY = 1; c.vy *= -1; }
-            absX = box.x + c.relX * box.width;
-            absY = box.y + c.relY * box.height;
-            sizeFactor = c.sizeFactor;
-            sticker = c.img;
-        }
-        const size = baseStickerSize * sizeFactor;
-        ctx.drawImage(sticker, absX - size / 2, absY - size / 2, size, size);
+
     }
+
+
+    // --------------------------------------------------------
+    // DETECCIÓN
+    // --------------------------------------------------------
+
+    setInterval(async () => {
+
+        try {
+
+            const detections = await faceapi
+
+                .detectAllFaces(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions()
+                )
+
+                .withFaceLandmarks();
+
+
+            // Limpiar canvas
+
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            // Ajustar detecciones
+
+            const resizedDetections =
+                faceapi.resizeResults(
+                    detections,
+                    displaySize
+                );
+
+
+            // Ajustar caché
+
+            faceFilterCache =
+                faceFilterCache.slice(
+                    0,
+                    resizedDetections.length
+                );
+
+
+            // ------------------------------------------------
+            // DIBUJAR CADA CARA
+            // ------------------------------------------------
+
+            resizedDetections.forEach(
+                (detection, i) => {
+
+                    // Crear filtro nuevo
+                    if (!faceFilterCache[i]) {
+
+                        faceFilterCache[i] = {
+
+                            type:
+                                getRandomFilterType(),
+
+                            specificCache: []
+
+                        };
+
+                        console.log(
+                            "Nuevo filtro:",
+                            faceFilterCache[i].type
+                        );
+
+                    }
+
+
+                    const filterData =
+                        faceFilterCache[i];
+
+
+                    switch (filterData.type) {
+
+
+                        // ------------------------------------
+                        // FANTÁSTICOS
+                        // ------------------------------------
+
+                        case "FANTASTICOS_DINAMICO":
+
+                            drawFilterFantasticosDinamicas(
+                                detection,
+                                filterData.specificCache
+                            );
+
+                            break;
+
+
+                        // ------------------------------------
+                        // MITOLÓGICOS
+                        // ------------------------------------
+
+                        case "MITOLOGICOS":
+
+                            drawFilterMitologicosEstaticas(
+                                detection,
+                                filterData.specificCache
+                            );
+
+                            break;
+
+
+                        // ------------------------------------
+                        // MÁSCARA
+                        // ------------------------------------
+
+                        case "MASCARA":
+
+                            drawMaskFilter(
+                                detection,
+                                quetzalcoatlOverlayImg
+                            );
+
+                            break;
+
+
+                        // ------------------------------------
+                        // PANTERA
+                        // ------------------------------------
+
+                        case "PANTERA":
+
+                            drawImageOverlay(
+                                detection,
+                                fondoMaskImg
+                            );
+
+                            break;
+
+
+                        // ------------------------------------
+                        // DRAGÓN WEBM
+                        // ------------------------------------
+
+                        case "WEBM_ANIMACION":
+
+                            drawWebmOverlayFilter(
+                                detection,
+                                animacionWebmVideo
+                            );
+
+                            break;
+
+                    }
+
+                }
+
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "ERROR EN LA DETECCIÓN:",
+                error
+            );
+
+        }
+
+    }, 100);
+
+});
+
+
+// ============================================================
+// DRAGÓN WEBM
+// ============================================================
+
+function drawWebmOverlayFilter(
+    detection,
+    webmVideoElement
+) {
+
+    if (
+        !detection ||
+        !webmVideoElement
+    ) {
+
+        return;
+    }
+
+
+    const box =
+        detection.detection.box;
+
+
+    const cx =
+        box.x +
+        box.width / 2;
+
+
+    const cy =
+        box.y +
+        box.height / 2;
+
+
+    const th =
+        box.height * 1.5;
+
+
+    const videoWidth =
+        webmVideoElement.videoWidth || 1;
+
+
+    const scale =
+        th / videoWidth;
+
+
+    const tw =
+        videoWidth * scale;
+
+
+    ctx.drawImage(
+
+        webmVideoElement,
+
+        cx - tw / 2,
+
+        cy - th / 2,
+
+        tw,
+
+        th
+
+    );
+
 }
 
-// --- FANTÁSTICOS DINÁMICOS ---
-function drawFilterFantasticosDinamicas(detection, cache) {
-    const box = detection.detection.box;
-    const newW = box.width * SCALE_FACTOR_DISPERSION;
-    const newH = box.height * SCALE_FACTOR_DISPERSION;
-    const extendedBox = {
-        x: box.x - (newW - box.width) / 2,
-        y: box.y - (newH - box.height) / 2,
-        width: newW,
-        height: newH
-    };
-    const baseSize = extendedBox.width * GLOBAL_SCALE_FACTOR;
-    drawRandomStickersFantásticos(extendedBox, TOTAL_STICKERS_PER_FACE, baseSize, STICKERS_FANTASTICOS, cache);
-}
 
-// --- PEGATINAS MITOLÓGICOS ESTÁTICAS ---
-function drawRandomStickersInBox(box, count, baseStickerSize, stickerArray, cache) {
-    const generateNew = cache.length === 0;
-    for (let j = 0; j < count; j++) {
-        let absX, absY, sizeFactor, sticker;
+// ============================================================
+// PEGATINAS FANTÁSTICOS
+// ============================================================
+
+function drawRandomStickersFantásticos(
+    box,
+    count,
+    baseStickerSize,
+    stickerArray,
+    cache
+) {
+
+    const generateNew =
+        cache.length === 0;
+
+
+    for (
+        let j = 0;
+        j < count;
+        j++
+    ) {
+
+        let absX;
+        let absY;
+        let sizeFactor;
+        let sticker;
+
+
+        // ----------------------------------------------------
+        // CREAR POSICIONES
+        // ----------------------------------------------------
+
         if (generateNew) {
-            absX = box.x + Math.random() * box.width;
-            absY = box.y + Math.random() * box.height;
-            sizeFactor = 0.8 + Math.random() * 0.4;
-            sticker = stickerArray[Math.floor(Math.random() * stickerArray.length)];
-            cache.push({ relX: (absX - box.x) / box.width, relY: (absY - box.y) / box.height, sizeFactor, img: sticker });
-        } else {
-            const c = cache[j];
-            absX = box.x + c.relX * box.width;
-            absY = box.y + c.relY * box.height;
-            sizeFactor = c.sizeFactor;
-            sticker = c.img;
+
+            absX =
+                box.x +
+                Math.random() *
+                box.width;
+
+
+            absY =
+                box.y +
+                Math.random() *
+                box.height;
+
+
+            sizeFactor =
+                0.8 +
+                Math.random() *
+                0.4;
+
+
+            sticker =
+                stickerArray[
+                    Math.floor(
+                        Math.random() *
+                        stickerArray.length
+                    )
+                ];
+
+
+            const vx =
+                (Math.random() - 0.5) *
+                10;
+
+
+            const vy =
+                (Math.random() - 0.5) *
+                10;
+
+
+            cache.push({
+
+                relX:
+                    (absX - box.x) /
+                    box.width,
+
+                relY:
+                    (absY - box.y) /
+                    box.height,
+
+                sizeFactor,
+
+                img: sticker,
+
+                vx,
+
+                vy
+
+            });
+
         }
-        const size = baseStickerSize * sizeFactor;
-        ctx.drawImage(sticker, absX - size / 2, absY - size / 2, size, size);
+
+
+        // ----------------------------------------------------
+        // MOVER PEGATINAS
+        // ----------------------------------------------------
+
+        else {
+
+            const c =
+                cache[j];
+
+
+            c.relX +=
+                c.vx /
+                box.width;
+
+
+            c.relY +=
+                c.vy /
+                box.height;
+
+
+            c.vx +=
+                (Math.random() - 0.5) *
+                0.5;
+
+
+            c.vy +=
+                (Math.random() - 0.5) *
+                0.5;
+
+
+            const maxSpeed = 10;
+
+
+            c.vx =
+                Math.max(
+                    Math.min(
+                        c.vx,
+                        maxSpeed
+                    ),
+                    -maxSpeed
+                );
+
+
+            c.vy =
+                Math.max(
+                    Math.min(
+                        c.vy,
+                        maxSpeed
+                    ),
+                    -maxSpeed
+                );
+
+
+            // Rebote horizontal
+
+            if (c.relX < 0) {
+
+                c.relX = 0;
+
+                c.vx *= -1;
+
+            }
+
+
+            if (c.relX > 1) {
+
+                c.relX = 1;
+
+                c.vx *= -1;
+
+            }
+
+
+            // Rebote vertical
+
+            if (c.relY < 0) {
+
+                c.relY = 0;
+
+                c.vy *= -1;
+
+            }
+
+
+            if (c.relY > 1) {
+
+                c.relY = 1;
+
+                c.vy *= -1;
+
+            }
+
+
+            absX =
+                box.x +
+                c.relX *
+                box.width;
+
+
+            absY =
+                box.y +
+                c.relY *
+                box.height;
+
+
+            sizeFactor =
+                c.sizeFactor;
+
+
+            sticker =
+                c.img;
+
+        }
+
+
+        // ----------------------------------------------------
+        // DIBUJAR
+        // ----------------------------------------------------
+
+        const size =
+            baseStickerSize *
+            sizeFactor;
+
+
+        if (
+            sticker &&
+            sticker.complete &&
+            sticker.naturalWidth > 0
+        ) {
+
+            ctx.drawImage(
+
+                sticker,
+
+                absX - size / 2,
+
+                absY - size / 2,
+
+                size,
+
+                size
+
+            );
+
+        }
+
     }
+
 }
 
-// --- MITOLÓGICOS ---
-function drawFilterMitologicosEstaticas(detection, cache) {
-    const box = detection.detection.box;
-    const newW = box.width * SCALE_FACTOR_DISPERSION;
-    const newH = box.height * SCALE_FACTOR_DISPERSION;
+
+// ============================================================
+// FANTÁSTICOS DINÁMICOS
+// ============================================================
+
+function drawFilterFantasticosDinamicas(
+    detection,
+    cache
+) {
+
+    const box =
+        detection.detection.box;
+
+
+    const newW =
+        box.width *
+        SCALE_FACTOR_DISPERSION;
+
+
+    const newH =
+        box.height *
+        SCALE_FACTOR_DISPERSION;
+
+
     const extendedBox = {
-        x: box.x - (newW - box.width) / 2,
-        y: box.y - (newH - box.height) / 2,
+
+        x:
+            box.x -
+            (newW - box.width) / 2,
+
+        y:
+            box.y -
+            (newH - box.height) / 2,
+
         width: newW,
+
         height: newH
+
     };
-    const baseSize = extendedBox.width * FLOWER_SCALE_FACTOR;
-    drawRandomStickersInBox(extendedBox, TOTAL_FLOWERS_PER_FACE, baseSize, STICKERS_MITOLOGICOS, cache);
+
+
+    const baseSize =
+        extendedBox.width *
+        GLOBAL_SCALE_FACTOR;
+
+
+    drawRandomStickersFantásticos(
+
+        extendedBox,
+
+        TOTAL_STICKERS_PER_FACE,
+
+        baseSize,
+
+        STICKERS_FANTASTICOS,
+
+        cache
+
+    );
+
 }
 
-// --- UNICORNIO REDUCIDO
-function drawMaskFilter(detection, maskImage) {
-    const box = detection.detection.box;
-    const landmarks = detection.landmarks;
-    const jaw = landmarks.getJawOutline();
-    const left = landmarks.getLeftEyeBrow();
-    const right = landmarks.getRightEyeBrow();
-    const foreheadTopY = box.y - box.height * 0.10;
-    const maskLeftX = box.x - box.width * 0.05;
-    const maskRightX = box.x + box.width * 1.05;
-    const maskWidth = maskRightX - maskLeftX;
-    const maskHeight = (jaw[8]?.y || (box.y + box.height)) - foreheadTopY;
-    const cx = maskLeftX + maskWidth / 2;
-    const cy = foreheadTopY + maskHeight / 2;
+
+// ============================================================
+// PEGATINAS MITOLÓGICAS ESTÁTICAS
+// ============================================================
+
+function drawRandomStickersInBox(
+    box,
+    count,
+    baseStickerSize,
+    stickerArray,
+    cache
+) {
+
+    const generateNew =
+        cache.length === 0;
+
+
+    for (
+        let j = 0;
+        j < count;
+        j++
+    ) {
+
+        let absX;
+        let absY;
+        let sizeFactor;
+        let sticker;
+
+
+        // ----------------------------------------------------
+        // CREAR
+        // ----------------------------------------------------
+
+        if (generateNew) {
+
+            absX =
+                box.x +
+                Math.random() *
+                box.width;
+
+
+            absY =
+                box.y +
+                Math.random() *
+                box.height;
+
+
+            sizeFactor =
+                0.8 +
+                Math.random() *
+                0.4;
+
+
+            sticker =
+                stickerArray[
+                    Math.floor(
+                        Math.random() *
+                        stickerArray.length
+                    )
+                ];
+
+
+            cache.push({
+
+                relX:
+                    (absX - box.x) /
+                    box.width,
+
+                relY:
+                    (absY - box.y) /
+                    box.height,
+
+                sizeFactor,
+
+                img: sticker
+
+            });
+
+        }
+
+
+        // ----------------------------------------------------
+        // RECUPERAR
+        // ----------------------------------------------------
+
+        else {
+
+            const c =
+                cache[j];
+
+
+            absX =
+                box.x +
+                c.relX *
+                box.width;
+
+
+            absY =
+                box.y +
+                c.relY *
+                box.height;
+
+
+            sizeFactor =
+                c.sizeFactor;
+
+
+            sticker =
+                c.img;
+
+        }
+
+
+        // ----------------------------------------------------
+        // DIBUJAR
+        // ----------------------------------------------------
+
+        const size =
+            baseStickerSize *
+            sizeFactor;
+
+
+        if (
+            sticker &&
+            sticker.complete &&
+            sticker.naturalWidth > 0
+        ) {
+
+            ctx.drawImage(
+
+                sticker,
+
+                absX - size / 2,
+
+                absY - size / 2,
+
+                size,
+
+                size
+
+            );
+
+        }
+
+    }
+
+}
+
+
+// ============================================================
+// MITOLÓGICOS
+// ============================================================
+
+function drawFilterMitologicosEstaticas(
+    detection,
+    cache
+) {
+
+    const box =
+        detection.detection.box;
+
+
+    const newW =
+        box.width *
+        SCALE_FACTOR_DISPERSION;
+
+
+    const newH =
+        box.height *
+        SCALE_FACTOR_DISPERSION;
+
+
+    const extendedBox = {
+
+        x:
+            box.x -
+            (newW - box.width) / 2,
+
+        y:
+            box.y -
+            (newH - box.height) / 2,
+
+        width: newW,
+
+        height: newH
+
+    };
+
+
+    const baseSize =
+        extendedBox.width *
+        FLOWER_SCALE_FACTOR;
+
+
+    drawRandomStickersInBox(
+
+        extendedBox,
+
+        TOTAL_FLOWERS_PER_FACE,
+
+        baseSize,
+
+        STICKERS_MITOLOGICOS,
+
+        cache
+
+    );
+
+}
+
+
+// ============================================================
+// MÁSCARA
+// ============================================================
+
+function drawMaskFilter(
+    detection,
+    maskImage
+) {
+
+    if (
+        !maskImage ||
+        !maskImage.complete ||
+        maskImage.naturalWidth === 0
+    ) {
+
+        return;
+    }
+
+
+    const box =
+        detection.detection.box;
+
+
+    const landmarks =
+        detection.landmarks;
+
+
+    if (!landmarks) {
+
+        return;
+
+    }
+
+
+    const jaw =
+        landmarks.getJawOutline();
+
+
+    const left =
+        landmarks.getLeftEyeBrow();
+
+
+    const right =
+        landmarks.getRightEyeBrow();
+
+
+    const foreheadTopY =
+        box.y -
+        box.height *
+        0.10;
+
+
+    const maskLeftX =
+        box.x -
+        box.width *
+        0.05;
+
+
+    const maskRightX =
+        box.x +
+        box.width *
+        1.05;
+
+
+    const maskWidth =
+        maskRightX -
+        maskLeftX;
+
+
+    const maskHeight =
+        (jaw[8]?.y ||
+            (box.y + box.height))
+        -
+        foreheadTopY;
+
+
+    const cx =
+        maskLeftX +
+        maskWidth / 2;
+
+
+    const cy =
+        foreheadTopY +
+        maskHeight / 2;
+
+
     ctx.save();
+
+
+    // --------------------------------------------------------
+    // RECORTE DE LA CARA
+    // --------------------------------------------------------
+
     ctx.beginPath();
-    ctx.moveTo(maskLeftX, foreheadTopY);
-    ctx.lineTo(maskRightX, foreheadTopY);
-    ctx.lineTo(right[4].x, right[4].y);
-    ctx.lineTo(jaw[jaw.length - 1].x, jaw[jaw.length - 1].y);
-    for (let i = jaw.length - 2; i >= 0; i--) ctx.lineTo(jaw[i].x, jaw[i].y);
-    ctx.lineTo(left[0].x, left[0].y);
+
+
+    ctx.moveTo(
+        maskLeftX,
+        foreheadTopY
+    );
+
+
+    ctx.lineTo(
+        maskRightX,
+        foreheadTopY
+    );
+
+
+    ctx.lineTo(
+        right[4].x,
+        right[4].y
+    );
+
+
+    ctx.lineTo(
+        jaw[jaw.length - 1].x,
+        jaw[jaw.length - 1].y
+    );
+
+
+    for (
+        let i = jaw.length - 2;
+        i >= 0;
+        i--
+    ) {
+
+        ctx.lineTo(
+            jaw[i].x,
+            jaw[i].y
+        );
+
+    }
+
+
+    ctx.lineTo(
+        left[0].x,
+        left[0].y
+    );
+
+
     ctx.closePath();
+
+
     ctx.clip();
-    const scale = Math.max(maskWidth / maskImage.naturalWidth, maskHeight / maskImage.naturalHeight) * 0.73;
-    drawImageWithTransform(ctx, maskImage, {
-        translate: [cx, cy],
-        scale,
-        rotate: 0,
-        offsetX: maskImage.naturalWidth / 2,
-        offsetY: maskImage.naturalHeight / 2
-    });
+
+
+    // --------------------------------------------------------
+    // DIBUJAR MÁSCARA
+    // --------------------------------------------------------
+
+    const scale =
+        Math.max(
+
+            maskWidth /
+                maskImage.naturalWidth,
+
+            maskHeight /
+                maskImage.naturalHeight
+
+        ) * 0.73;
+
+
+    drawImageWithTransform(
+
+        ctx,
+
+        maskImage,
+
+        {
+
+            translate: [
+                cx,
+                cy
+            ],
+
+            scale,
+
+            rotate: 0,
+
+            offsetX:
+                maskImage.naturalWidth / 2,
+
+            offsetY:
+                maskImage.naturalHeight / 2
+
+        }
+
+    );
+
+
     ctx.restore();
+
 }
 
-// --- QUETZALCÓATL SUPERPOSICIÓN
-function drawImageOverlay(detection, overlayImage) {
-    const box = detection.detection.box;
-    const cx = box.x + box.width / 2;
-    const cy = box.y + box.height / 2;
-    const tw = box.width * 0.9;
-    const scale = tw / overlayImage.naturalWidth;
-    const th = overlayImage.naturalHeight * scale;
-    ctx.drawImage(overlayImage, cx - tw / 2, cy - th / 2, tw, th);
+
+// ============================================================
+// OVERLAY
+// ============================================================
+
+function drawImageOverlay(
+    detection,
+    overlayImage
+) {
+
+    if (
+        !overlayImage ||
+        !overlayImage.complete ||
+        overlayImage.naturalWidth === 0
+    ) {
+
+        return;
+    }
+
+
+    const box =
+        detection.detection.box;
+
+
+    const cx =
+        box.x +
+        box.width / 2;
+
+
+    const cy =
+        box.y +
+        box.height / 2;
+
+
+    const tw =
+        box.width *
+        0.9;
+
+
+    const scale =
+        tw /
+        overlayImage.naturalWidth;
+
+
+    const th =
+        overlayImage.naturalHeight *
+        scale;
+
+
+    ctx.drawImage(
+
+        overlayImage,
+
+        cx - tw / 2,
+
+        cy - th / 2,
+
+        tw,
+
+        th
+
+    );
+
 }
 
-// --- UTILIDAD DE TRANSFORMACIÓN ---
-function drawImageWithTransform(ctx, img, t) {
+
+// ============================================================
+// TRANSFORMACIÓN DE IMÁGENES
+// ============================================================
+
+function drawImageWithTransform(
+    ctx,
+    img,
+    t
+) {
+
     ctx.save();
-    ctx.translate(t.translate[0], t.translate[1]);
-    ctx.rotate((t.rotate * Math.PI) / 180);
-    ctx.scale(t.scale, t.scale);
-    ctx.drawImage(img, -t.offsetX, -t.offsetY);
+
+
+    ctx.translate(
+        t.translate[0],
+        t.translate[1]
+    );
+
+
+    ctx.rotate(
+        (t.rotate * Math.PI) / 180
+    );
+
+
+    ctx.scale(
+        t.scale,
+        t.scale
+    );
+
+
+    ctx.drawImage(
+
+        img,
+
+        -t.offsetX,
+
+        -t.offsetY
+
+    );
+
+
     ctx.restore();
+
 }
+
